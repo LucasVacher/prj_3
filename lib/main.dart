@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/connexion.dart';
+import 'package:prj_3/service/api_handler.dart';
+import 'classement.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,13 +18,15 @@ class MyApp extends StatelessWidget {
       home: Connexion(),
     );
   }
-}
-
-
-
-@override
+/*
+  @override
   void didChangeDependencies() {
-APIHandler.getAllProducts();
-super.didChangeDependencies();
+    APIHandler.getAllProducts();
+    super.didChangeDependencies();
   }
+*/
+
 }
+
+
+

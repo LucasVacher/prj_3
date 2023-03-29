@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:projet4/pages/colors.dart';
-import 'package:projet4/pages/accueil.dart';
-import 'package:projet4/pages/inscription.dart';
+import 'package:prj_3/pages/colors.dart';
+import 'package:prj_3/pages/accueil.dart';
+import 'package:prj_3/pages/inscription.dart';
 
 class Connexion extends StatefulWidget {
   @override

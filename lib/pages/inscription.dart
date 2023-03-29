@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:projet4/pages/colors.dart';
+import 'package:prj_3/pages/colors.dart';
+import 'package:prj_3/pages/connexion.dart';
 
 class Inscription extends StatefulWidget {
   @override
@@ -167,7 +168,7 @@ class _InscriptionState extends State<Inscription> {
                 onPressed: (){
                   Navigator.push (
                     context,
-                    MaterialPageRoute(builder: (context)=>Accueil()),
+                    MaterialPageRoute(builder: (context)=> Connexion()),
                   );
                 },
 
