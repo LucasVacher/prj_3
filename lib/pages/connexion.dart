@@ -107,8 +107,8 @@ class _ConnexionState extends State<Connexion> {
               ),
 
               SizedBox(height: 80),
-
-              /* ElevatedButton(
+/*
+              ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     primary: color_2,
                     padding: const EdgeInsets.symmetric(horizontal:70, vertical:20)

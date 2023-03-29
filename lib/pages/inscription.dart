@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:prj_3/pages/colors.dart';
 import 'package:prj_3/pages/connexion.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_3/widgets/widget.dart';
+import 'package:flutter/src/widgets/container.dart';
+
 
 class Inscription extends StatefulWidget {
+  const Inscription({super.key});
   @override
-  _InscriptionState createState() => _InscriptionState();
+  State<Inscription> createState() => _InscriptionState();
 }
 
 class _InscriptionState extends State<Inscription> {
@@ -36,7 +41,7 @@ class _InscriptionState extends State<Inscription> {
             children: <Widget>[
               // Texte Bienvenue
               Text(
-                'Inscription',
+                'Inscri',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -159,20 +164,18 @@ class _InscriptionState extends State<Inscription> {
 
               SizedBox(height: 80),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: color_2,
-                    padding: const EdgeInsets.symmetric(horizontal:70, vertical:20)
-                ),
-                child: Text('S inscrire'),
-                onPressed: (){
-                  Navigator.push (
-                    context,
-                    MaterialPageRoute(builder: (context)=> Connexion()),
-                  );
-                },
-
-              ),
+              signInSignUpButton(context, false, () {
+                FirebaseAuth.instance
+                    .createUserWithEmailAndPassword(
+                    email: _emailController.text,
+                    password: _passwordController.text)
+                    .then((value) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Connexion()));
+                }).onError((error, stackTrace){
+                  print("Error ${error.toString()}");
+                });
+              })
             ],
           ),
         ),
