@@ -4,6 +4,7 @@ import 'package:prj_3/pages/connexion.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_3/widgets/widget.dart';
 import 'package:flutter/src/widgets/container.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 class Inscription extends StatefulWidget {
@@ -107,7 +108,7 @@ class _InscriptionState extends State<Inscription> {
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.1),
                 ),
-                obscureText: true,
+                obscureText: false,
               ),
 
               SizedBox(height: 10),
@@ -172,14 +173,33 @@ class _InscriptionState extends State<Inscription> {
                     .then((value) {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => Connexion()));
-                }).onError((error, stackTrace){
-                  print("Error ${error.toString()}");
-                });
+                }).catchError((dynamic error){
+                  if (error.code.contains('invalid-email')) {
+                    _buildErrorMessage("Mail invalid");
+                  }
+                  if (error.code.contains('user-not-found')) {
+                    _buildErrorMessage("utilisateur inconnu. Créer un compte");
+                  }
+                  if (error.code.contains('weak-password')) {
+                    _buildErrorMessage("Mot de passe trop court");
+                  }
+                }
+                );
               })
             ],
           ),
         ),
       ),
     );
+  }
+  void _buildErrorMessage(String text) {
+    Fluttertoast.showToast(
+        msg: text,
+        timeInSecForIosWeb: 2,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.white,
+        textColor: Colors.red,
+        fontSize: 20);
   }
 }

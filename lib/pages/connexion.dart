@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:prj_3/pages/colors.dart';
 import 'package:prj_3/pages/accueil.dart';
 import 'package:prj_3/pages/inscription.dart';
+import 'package:prj_3/widgets/widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 
 class Connexion extends StatefulWidget {
   @override
@@ -37,7 +41,7 @@ class _ConnexionState extends State<Connexion> {
 
               // Texte Bienvenue
               Text(
-                'Bienvenue !',
+                'Bienvenue 10 !',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -78,7 +82,7 @@ class _ConnexionState extends State<Connexion> {
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.1),
                 ),
-                obscureText: true,
+                obscureText: false,
               ),
 
               SizedBox(height: 15),
@@ -107,28 +111,36 @@ class _ConnexionState extends State<Connexion> {
               ),
 
               SizedBox(height: 80),
-/*
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: color_2,
-                    padding: const EdgeInsets.symmetric(horizontal:70, vertical:20)
-                ),
-                child: Text('Se connecter'),
-                onPressed: (){
-                  Navigator.push (
-                    context,
-                    MaterialPageRoute(builder: (context)=>Accueil()),
-                  );
-                },
 
-              ),*/
+              signInSignUpButton(context, true, () {
+                FirebaseAuth.instance
+                    .signInWithEmailAndPassword(
+                    email: _usernameController.text,
+                    password: _passwordController.text)
+                    .then((value) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (contxte) => Accueil()));
+                }).catchError((dynamic error){
+                  if (error.code.contains('invalid-email')) {
+                    _buildErrorMessage("Mail invalid");
+                  }
+                  if (error.code.contains('user-not-found')) {
+                    _buildErrorMessage("utilisateur inconnu. Créer un compte");
+                  }
+                  if (error.code.contains('wrong-password')) {
+                    _buildErrorMessage("Mot de passeincorrect");
+                  }
+                }
+                );
+              }),
+
 
               SizedBox(height: 10),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   primary: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(horizontal:70, vertical:20),
+                  padding: const EdgeInsets.symmetric(horizontal:90, vertical:20),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                     side: BorderSide(color: color_2),
@@ -145,9 +157,9 @@ class _ConnexionState extends State<Connexion> {
               ),
 
 
-              SizedBox(height: 200),
+              SizedBox(height: 100),
 
-              Text(
+              /*Text(
                 'Mot de passe oublié',
                 style: TextStyle(
                   fontSize: 18,
@@ -155,7 +167,7 @@ class _ConnexionState extends State<Connexion> {
                   decoration: TextDecoration.underline,
                 ),
                 textAlign: TextAlign.center,
-              ),
+              ),*/
 
             ],
           ),
@@ -163,4 +175,16 @@ class _ConnexionState extends State<Connexion> {
       ),
     );
   }
+
+  void _buildErrorMessage(String text) {
+    Fluttertoast.showToast(
+        msg: text,
+        timeInSecForIosWeb: 2,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.white,
+        textColor: Colors.red,
+        fontSize: 20);
+  }
+
 }

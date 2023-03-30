@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:prj_3/pages/colors.dart';
+
 
 Container signInSignUpButton(
     BuildContext context, bool isLogin, Function onTap) {
   return Container(
-    width: MediaQuery.of(context).size.width,
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(horizontal: 7.0),
     height: 50,
-    margin: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-    decoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
     child: ElevatedButton(
       onPressed: () {
         onTap();
       },
       child: Text(
-        isLogin ? 'LOG IN' : 'SIGN UP',
-        style: const TextStyle(
-            color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 16),
+        isLogin ? 'Connexion' : 'Sinscrire',
+        style: const TextStyle(color: Colors.white),
       ),
       style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.pressed)) {
-              return Colors.black26;
+              return Colors.transparent;
             }
-            return Colors.blue;
+            return color_2;
           }),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
     ),
   );
 }
