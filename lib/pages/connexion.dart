@@ -5,6 +5,8 @@ import 'package:prj_3/pages/inscription.dart';
 import 'package:prj_3/widgets/widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:prj_3/pages/likes_vides.dart';
+import 'package:prj_3/pages/whishlish_vides.dart';
 
 
 class Connexion extends StatefulWidget {
@@ -119,7 +121,7 @@ class _ConnexionState extends State<Connexion> {
                     password: _passwordController.text)
                     .then((value) {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (contxte) => Accueil()));
+                      MaterialPageRoute(builder: (contxte) => Wishlist_vides()));
                 }).catchError((dynamic error){
                   if (error.code.contains('invalid-email')) {
                     _buildErrorMessage("Mail invalid");
@@ -178,13 +180,14 @@ class _ConnexionState extends State<Connexion> {
 
   void _buildErrorMessage(String text) {
     Fluttertoast.showToast(
+        backgroundColor: Colors.red,
         msg: text,
         timeInSecForIosWeb: 2,
-        toastLength: Toast.LENGTH_SHORT,
+        toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.white,
-        textColor: Colors.red,
-        fontSize: 20);
+        textColor: Colors.white,
+        fontSize: 20
+        );
   }
 
 }
