@@ -5,8 +5,7 @@ import 'package:prj_3/pages/inscription.dart';
 import 'package:prj_3/widgets/widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:prj_3/pages/likes_vides.dart';
-import 'package:prj_3/pages/whishlish_vides.dart';
+
 
 
 class Connexion extends StatefulWidget {
@@ -120,8 +119,10 @@ class _ConnexionState extends State<Connexion> {
                     email: _usernameController.text,
                     password: _passwordController.text)
                     .then((value) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (contxte) => Wishlist_vides()));
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyApp()),
+                  );
                 }).catchError((dynamic error){
                   if (error.code.contains('invalid-email')) {
                     _buildErrorMessage("Mail invalid");
