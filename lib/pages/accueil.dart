@@ -80,13 +80,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
   Future<List<Map<String, dynamic>>> _futureProductDetails = Future.value([]);
+  List<Map<String, dynamic>> _products = [];
+
+
 
   @override
   void initState() {
     super.initState();
-    _futureProductDetails = getAllProductDetails();
+    getAllProductDetails().then((products) {
+      setState(() {
+        _products = products;
+      });
+    });
   }
+
+  @override
   String getPrice(Map<String, dynamic>? details) {
     final isFree = details?['is_free'] ?? false;
     if (isFree) {
@@ -96,13 +106,13 @@ class _MyAppState extends State<MyApp> {
       String price;
       if (jsonResponse2 != null) {
         //Si le prix du jeu est correctement renseigné
-        if(jsonResponse2['initial_formatted'] != "")
-        {
+        if (jsonResponse2['initial_formatted'] != "") {
           //On récupère le prix initial (avant réduction)
           price = jsonResponse2['initial_formatted'];
         } else {
           //Sinon on récupère le prix final
-          price = jsonResponse2['final_formatted'] ?? jsonResponse2['initial_formatted'];
+          price = jsonResponse2['final_formatted'] ??
+              jsonResponse2['initial_formatted'];
         }
       } else {
         //Sinon on le met gratuit
@@ -113,8 +123,9 @@ class _MyAppState extends State<MyApp> {
   }
 
 
-
   @override
+  List<Map<String, dynamic>> _filteredProducts = [];
+
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -128,12 +139,58 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {},
             ),
             IconButton(
-              icon: Icon(Icons.star_border_outlined),
+              icon:Icon(Icons.star_border_outlined),
               onPressed: () {},
             ),
+
           ],
         ),
-        body: Center(
+
+        body:
+        Column(
+          children: [
+        TextField(
+        decoration: InputDecoration(
+        hintText: 'Rechercher...',
+
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        filled: true,
+          fillColor: Color(0xFF1A2026),
+          border: OutlineInputBorder(
+            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(8.0),
+          )
+        ),
+style: TextStyle(
+  color: Colors.white
+),
+
+
+          onChanged: (value) {
+            setState(() {
+              _filteredProducts = _products
+                  .where((product) =>
+                  product['name'].toLowerCase().contains(value.toLowerCase()))
+                  .toList();
+            });
+            },
+      ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredProducts.length,
+                itemBuilder: (context, index) {
+                  final product = _filteredProducts[index];
+                  return ListTile(
+                    leading: Image.network(product['header_image']),
+                    title: Text(product['name']),
+                    subtitle: Text(product['publishers'][0]),
+                    trailing: product['is_free'] ? Text('GRATUIT') : null,
+                  );
+                },
+              ),
+            ),
+
+        Center(
           child: FutureBuilder<List<Map<String, dynamic>>>(
             future: _futureProductDetails,
             builder: (context, snapshot) {
@@ -180,13 +237,16 @@ class _MyAppState extends State<MyApp> {
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  'Publishers: ${details?['publishers']?.join(', ') ?? ''}',
-                                  style: TextStyle(fontSize: 16,color: Colors.white,),
+                                  'Publishers: ${details?['publishers']?.join(
+                                      ', ') ?? ''}',
+                                  style: TextStyle(
+                                    fontSize: 16, color: Colors.white,),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   'Free: ${details?['is_free'] ? 'Yes' : 'No'}',
-                                  style: TextStyle(fontSize: 16,color: Colors.white,),
+                                  style: TextStyle(
+                                    fontSize: 16, color: Colors.white,),
                                 ),
                               ],
                             ),
@@ -215,7 +275,82 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
 
+      ],
+    ),
       ),
     );
   }
+
+  void search(value) {}
 }
+  class ProductSearchDelegate extends SearchDelegate<String> {
+  final List<Map<String, dynamic>> products;
+
+  ProductSearchDelegate(this.products);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+  return [      IconButton(        icon: const Icon(Icons.clear),        onPressed: () {          query = '';        },      )    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+  return IconButton(
+  icon: const Icon(Icons.arrow_back),
+  onPressed: () {
+  close(context, '');
+  },
+  );
+  }
+  @override
+  Widget buildResults(BuildContext context) {
+  final results = products.where((product) => product['name'].contains(query)).toList();
+  if (products.isEmpty) {// c'est censé gérer l'erreur
+    return Center(
+      child: Text(
+        'Aucun résultat trouvé pour "$query".',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+        ),
+      ),
+    );
+  }
+  return ListView.builder(
+  itemCount: results.length,
+  itemBuilder: (context, index) {
+  final product = results[index];
+  return ListTile(
+  leading: Image.network(product['header_image']),
+  title: Text(product['name']),
+  subtitle: Text(product['publishers'][0]),
+  trailing: product['is_free'] ? Text('GRATUIT') : null,
+  onTap: () {
+  close(context, product['name']);
+  },
+  );
+  },
+  );
+  }  @override
+  Widget buildSuggestions(BuildContext context) {
+  final results = products.where((product) => product['name'].contains(query)).toList();
+  return ListView.builder(
+  itemCount: results.length,
+  itemBuilder: (context, index) {
+  final product = results[index];
+  return ListTile(
+  leading: Image.network(product['header_image']),
+  title: Text(product['name']),
+  subtitle: Text(product['publishers'][0]),
+  trailing: product['is_free'] ? Text('GRATUIT') : null,
+  onTap: () {
+  close(context, product['name']);
+  },
+  );
+  },
+  );
+  }
+  }
+
+
+
