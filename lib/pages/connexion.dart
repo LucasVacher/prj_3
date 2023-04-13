@@ -42,7 +42,7 @@ class _ConnexionState extends State<Connexion> {
 
               // Texte Bienvenue
               Text(
-                'Bienvenue 10 !',
+                'Bienvenue !',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

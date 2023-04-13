@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:prj_3/pages/colors.dart';
-import 'package:flutter/material.dart';
-import 'package:prj_3/pages/colors.dart';
-import 'package:prj_3/pages/likes_vides.dart';
-import 'package:prj_3/pages/whishlish_vides.dart';
-import 'package:prj_3/pages/inscription.dart';
-import 'package:prj_3/widgets/widget.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_3/pages/detailsjeu.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'package:prj_3/pages/recherche.dart';
+import 'package:prj_3/pages/whishlish_vides.dart';
+import 'details_jeux.dart';
+import 'likes_vides.dart';
 
 Future<List<int>> getAllProducts() async {
   var response = await http.get(Uri.parse(
@@ -26,6 +22,7 @@ Future<List<int>> getAllProducts() async {
     throw Exception('échec chargement ID');
   }
 }
+
 
 Future<Map<String, dynamic>> getProductDetails(int productId) async {
   var response = await http.get(Uri.parse(
@@ -56,15 +53,19 @@ Future<List<Map<String, dynamic>>> getAllProductDetails() async {
       final headerImage = details['header_image'];
       final publishers = details['publishers'];
       final isFree = details['is_free'];
+      final detailedDescription = details['detailed_description'];
+
       productDetails.add({
         'name': name,
         'header_image': headerImage,
         'publishers': publishers,
         'is_free': isFree,
+        'detailed_description': detailedDescription,
+
       });
     } catch (e) {
       print(e);
-      // Continuer avec le produit suivant en cas d'erreur.
+
       continue;
     }
   }
@@ -79,16 +80,16 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
 
+
+class _MyAppState extends State<MyApp> {
   Future<List<Map<String, dynamic>>> _futureProductDetails = Future.value([]);
   List<Map<String, dynamic>> _products = [];
-
-
 
   @override
   void initState() {
     super.initState();
+    _futureProductDetails = getAllProductDetails();
     getAllProductDetails().then((products) {
       setState(() {
         _products = products;
@@ -96,7 +97,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  @override
   String getPrice(Map<String, dynamic>? details) {
     final isFree = details?['is_free'] ?? false;
     if (isFree) {
@@ -122,7 +122,6 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-
   @override
   List<Map<String, dynamic>> _filteredProducts = [];
 
@@ -136,134 +135,155 @@ class _MyAppState extends State<MyApp> {
           actions: [
             IconButton(
               icon: Icon(Icons.favorite_border_outlined),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Likes_vides()),
+                );
+              },
             ),
             IconButton(
-              icon:Icon(Icons.star_border_outlined),
-              onPressed: () {},
+              icon: Icon(Icons.star_border_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Wishlist_vides()),
+                );
+              },
             ),
-
-          ],
-        ),
-
-        body:
-        Column(
-          children: [
-        TextField(
-        decoration: InputDecoration(
-        hintText: 'Rechercher...',
-
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-        filled: true,
-          fillColor: Color(0xFF1A2026),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(8.0),
-          )
-        ),
-style: TextStyle(
-  color: Colors.white
-),
-
-
-          onChanged: (value) {
-            setState(() {
-              _filteredProducts = _products
-                  .where((product) =>
-                  product['name'].toLowerCase().contains(value.toLowerCase()))
-                  .toList();
-            });
-            },
+      IconButton(
+        icon: Icon(Icons.search),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Recherche()),
+          );
+        },
       ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filteredProducts.length,
-                itemBuilder: (context, index) {
-                  final product = _filteredProducts[index];
-                  return ListTile(
-                    leading: Image.network(product['header_image']),
-                    title: Text(product['name']),
-                    subtitle: Text(product['publishers'][0]),
-                    trailing: product['is_free'] ? Text('GRATUIT') : null,
-                  );
-                },
-              ),
-            ),
 
-        Center(
+
+      ],
+
+        ),
+
+
+
+        body: Center(
           child: FutureBuilder<List<Map<String, dynamic>>>(
             future: _futureProductDetails,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final productDetails = snapshot.data;
-                return ListView.builder(
-                  itemCount: productDetails?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    final details = productDetails?[index];
-                    final price = getPrice(details);
-                    return Container(
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF2D333D),
-                        borderRadius: BorderRadius.circular(8),
+                return Column(
+                  children: [
+                    // Afficher le premier jeu en grand
+                    Container(
+
+                      height: 300,
+                      width: double.infinity,
+                      child: Image.network(
+                        productDetails?.first?['header_image'] ?? '',
+                        fit: BoxFit.cover,
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              height: 100,
-                              child: Image.network(
-                                details?['header_image'] ?? '',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  details?['name'] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Publishers: ${details?['publishers']?.join(
-                                      ', ') ?? ''}',
-                                  style: TextStyle(
-                                    fontSize: 16, color: Colors.white,),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Free: ${details?['is_free'] ? 'Yes' : 'No'}',
-                                  style: TextStyle(
-                                    fontSize: 16, color: Colors.white,),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Container(
-                            width: 100,
-                            height: 100,
+
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: (productDetails?.length ?? 0) - 1,
+                        itemBuilder: (context, index) {
+                          final details = productDetails?[index + 1];
+                          final price = getPrice(details);
+                          return Container(
+                            padding: EdgeInsets.all(8),
+                            margin: EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Color(0xFF636AF6),
+                              color: Color(0xFF2D333D),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                        ],
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Container(
+                                    height: 100,
+                                    child: Image.network(
+                                      details?['header_image'] ?? '',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        details?['name'] ?? '',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Publishers: ${details?['publishers']?.join(', ') ?? ''}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Free: ${details?['is_free'] ? 'Yes' : 'No'}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                final name = details?['name'] ?? '';
+                                final detailedDescription = details?['detailed_description'] ?? '';
+                                final headerImage = details?['header_image'] ?? '';
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ProductDetailsPage(
+                                          name: name,
+                                          detailed_description: detailedDescription,
+                                          header_image: headerImage,
+                                        ),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF636AF6),
+                              ),
+                              child: Text(
+                                'En savoir plus',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+
+
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 );
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
@@ -275,82 +295,8 @@ style: TextStyle(
           ),
         ),
 
-      ],
-    ),
       ),
     );
   }
 
-  void search(value) {}
 }
-  class ProductSearchDelegate extends SearchDelegate<String> {
-  final List<Map<String, dynamic>> products;
-
-  ProductSearchDelegate(this.products);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-  return [      IconButton(        icon: const Icon(Icons.clear),        onPressed: () {          query = '';        },      )    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-  return IconButton(
-  icon: const Icon(Icons.arrow_back),
-  onPressed: () {
-  close(context, '');
-  },
-  );
-  }
-  @override
-  Widget buildResults(BuildContext context) {
-  final results = products.where((product) => product['name'].contains(query)).toList();
-  if (products.isEmpty) {// c'est censé gérer l'erreur
-    return Center(
-      child: Text(
-        'Aucun résultat trouvé pour "$query".',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
-  return ListView.builder(
-  itemCount: results.length,
-  itemBuilder: (context, index) {
-  final product = results[index];
-  return ListTile(
-  leading: Image.network(product['header_image']),
-  title: Text(product['name']),
-  subtitle: Text(product['publishers'][0]),
-  trailing: product['is_free'] ? Text('GRATUIT') : null,
-  onTap: () {
-  close(context, product['name']);
-  },
-  );
-  },
-  );
-  }  @override
-  Widget buildSuggestions(BuildContext context) {
-  final results = products.where((product) => product['name'].contains(query)).toList();
-  return ListView.builder(
-  itemCount: results.length,
-  itemBuilder: (context, index) {
-  final product = results[index];
-  return ListTile(
-  leading: Image.network(product['header_image']),
-  title: Text(product['name']),
-  subtitle: Text(product['publishers'][0]),
-  trailing: product['is_free'] ? Text('GRATUIT') : null,
-  onTap: () {
-  close(context, product['name']);
-  },
-  );
-  },
-  );
-  }
-  }
-
-
-

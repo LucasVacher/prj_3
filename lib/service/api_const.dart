@@ -1,1 +1,0 @@
-String BASE_URL = "api.steampowered.com";
